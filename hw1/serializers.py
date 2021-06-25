@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from .models import Post, Comment
 
@@ -6,6 +7,16 @@ class CommentItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = 'id text rating'.split()
+
+
+class CommentsValidateSerializer(serializers.Serializer):
+    comment = serializers.CharField(min_length=2, max_length=100)
+
+    def validated_comment(self, object):
+        if Comment.objects.filter(name=object).count() > 0:
+            raise ValidationError("Такой коммент уже есть!")
+        else:
+            return object
 
 
 class PostListSerializer(serializers.ModelSerializer):
@@ -30,6 +41,17 @@ class PostItemSerializer(serializers.ModelSerializer):
         model = Post
         fields = 'id title text'.split()
 
+
+class PostsValidateSerializer(serializers.Serializer):
+    title = serializers.CharField(min_length=2, max_length=100)
+    text = serializers.CharField(min_length=5)
+
+    def validate(self, object):
+        object = object["title"]
+        if Post.objects.filter(title=object).count() > 0:
+            raise ValidationError("Такой пост уже есть!")
+        else:
+            return object
 
 # class CommentListSerializer(serializers.ModelSerializer):
 #     post = PostItemSerializer()

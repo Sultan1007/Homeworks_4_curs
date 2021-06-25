@@ -21,5 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/posts/', views.post_list_views),
     path('api/v1/posts/<int:id>/', views.post_item_view),
-    path('api/v1/comments/', views.comment_list),
+    path('api/v1/comments/', views.comment_list_view),
 ]
