@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from .models import Post, Comment
@@ -53,9 +54,25 @@ class PostsValidateSerializer(serializers.Serializer):
         else:
             return object
 
+
 # class CommentListSerializer(serializers.ModelSerializer):
 #     post = PostItemSerializer()
 #
 #     class Meta:
 #         model = Comment
 #         fields = 'id created_date text rating'.split()
+
+
+class UserLoginValidateSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=1000)
+    password = serializers.CharField(max_length=1000)
+
+
+class UserRegisterValidateSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=1000)
+    password = serializers.CharField(max_length=1000)
+    password1 = serializers.CharField(max_length=1000)
+
+    def validate_username(self, username):
+        if User.objects.filter(username=username).count() > 0:
+            raise ValidationError('Пользователь уже существует')

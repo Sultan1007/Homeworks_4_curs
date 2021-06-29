@@ -1,11 +1,14 @@
+from django.contrib import auth
+from django.contrib.auth.models import User
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 # Create your views here.
 from hw1.models import Post, Comment
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from hw1.serializers import PostListSerializer, CommentItemSerializer, CommentsValidateSerializer, \
-    PostsValidateSerializer
+    PostsValidateSerializer, UserRegisterValidateSerializer, UserLoginValidateSerializer
 
 
 @api_view(['GET', 'POST'])
@@ -69,3 +72,48 @@ def comment_item_view(request, id):
         raise NotFound('Not found')
     data = CommentItemSerializer(comment, many=False).data
     return Response(data=data)
+
+
+@api_view(['POST'])
+def login(request):
+    if request.method == 'POST':
+        serializer = UserLoginValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+                data={
+                    'message': 'error',
+                    'errors': serializer.errors,
+                }
+            )
+        username = request.data['username']
+        password = request.data['password']
+        user = auth.authenticate(username=username, password=password)
+        if user:
+            try:
+                token = Token.objects.get(user=user)
+            except:
+                token = Token.objects.create(user=user)
+            return Response(data={'key': token.key})
+        else:
+            return Response(data={'message': 'USER NOT FOUND'})
+
+
+@api_view(['POST'])
+def register(request):
+    if request.method == 'POST':
+        serializer = UserRegisterValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+                data={
+                    'message': 'error',
+                    'errors': serializer.errors,
+                }
+            )
+        User.objects.create_user(
+            username=request.data['username'],
+            email='a@a.ru',
+            password=request.data['password']
+        )
+        return Response(data={'User created'})

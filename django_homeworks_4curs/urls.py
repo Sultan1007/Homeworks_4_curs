@@ -2,7 +2,8 @@
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.2/topics/http/urls/
-Examples:
+Example
++-s:
 Function views
     1. Add an import:  from my_app import views
     2. Add a URL to urlpatterns:  path('', views.home, name='home')
@@ -22,4 +23,6 @@ urlpatterns = [
     path('api/v1/posts/', views.post_list_views),
     path('api/v1/posts/<int:id>/', views.post_item_view),
     path('api/v1/comments/', views.comment_list_view),
+    path('api/v1/login/', views.login),
+    path('api/v1/register/', views.register),
 ]
