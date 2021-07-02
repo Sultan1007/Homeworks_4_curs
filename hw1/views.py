@@ -83,7 +83,7 @@ def login(request):
                 status=status.HTTP_406_NOT_ACCEPTABLE,
                 data={
                     'message': 'error',
-                    'errors': serializer.errors,
+                    'errors': serializer.errors
                 }
             )
         username = request.data['username']
@@ -108,7 +108,7 @@ def register(request):
                 status=status.HTTP_406_NOT_ACCEPTABLE,
                 data={
                     'message': 'error',
-                    'errors': serializer.errors,
+                    'errors': serializer.errors
                 }
             )
         User.objects.create_user(
