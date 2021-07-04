@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 # Create your views here.
-from hw1.models import Post, Comment
+from hw1.models import Post, Comment, PostLike
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from hw1.serializers import PostListSerializer, CommentItemSerializer, CommentsValidateSerializer, \
@@ -24,11 +24,17 @@ def post_list_views(request):
                     'errors': serializer.errors
                 }
             )
-        post = Post.objects.create(title=request.data["title"], text=request.data["text"])
+        post = Post.objects.create(
+            title=request.validated_data["title"],
+            text=request.validated_data["text"],
+            like_count=serializer.validated_data['favourite_count'],
+        )
+        post.hash_tag.set(serializer.validated_data['tags'])
+        post.save()
         return Response(data={'message': 'created'})
     else:
         posts = Post.objects.all()
-        data = PostListSerializer(posts, many=True).data
+        data = PostListSerializer(posts, many=True, context={"request": request}).data
         return Response(data={'list': data})
 
 
@@ -38,8 +44,13 @@ def post_item_view(request, id):
         post = Post.objects.get(id=id)
     except Post.DoesNotExist:
         raise NotFound('Not found')
-    data = PostListSerializer(post, many=False).data
-    return Response(data=data)
+    if request.method == 'GET':
+        data = PostListSerializer(post, many=False).data
+        return Response(data=data)
+    elif request.method == 'POST':
+        PostLike.objects.create(post=post,
+                                user=request.user)
+        return Response(data={'message': 'Post was liked'})
 
 
 @api_view(['GET'])

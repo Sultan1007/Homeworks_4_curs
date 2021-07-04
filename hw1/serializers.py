@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils.functional import empty
 from rest_framework import serializers
-from .models import Post, Comment
+from .models import Post, Comment, PostLike
 
 
 class CommentItemSerializer(serializers.ModelSerializer):
@@ -24,10 +24,21 @@ class CommentsValidateSerializer(serializers.Serializer):
 class PostListSerializer(serializers.ModelSerializer):
     comment = serializers.SerializerMethodField()
     count = serializers.SerializerMethodField()
+    # hash_tag = serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
+    is_like = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = 'id title text comment count'.split()
+        fields = 'id is_like like_count title text comment count'.split()
+
+    def get_is_like(self, obj):
+        if PostLike.objects.filter(post=obj, user=self.context['request'].user).count():
+            return True
+        return False
+
+    def get_like_count(self, obj):
+        return PostLike.objects.filter(post=obj).count()
 
     def get_comment(self, instance):
         comments = Comment.objects.filter(post_id=instance)

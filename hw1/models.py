@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -27,3 +28,10 @@ class Comment(models.Model):
 
     # def __str__(self):
     #     return self.text
+
+
+class PostLike(models.Model):
+    post = models.ForeignKey(Post, null=True,
+                             on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, null=True,
+                             on_delete=models.SET_NULL)
